@@ -3,16 +3,36 @@ import { FormEvent } from "react";
 import { Button } from "../../components/button";
 import { Input } from "../../components/input";
 import { Modal } from "../../components/modal";
+import { format } from "date-fns";
+import { DateRange } from "react-day-picker";
+import { ptBR } from "date-fns/locale";
 
 interface ConfirmTripModalProps {
+  destination: string;
+  eventStartAndEndDates: DateRange | undefined;
   closeConfirmTripModal: () => void;
   createTrip: (event: FormEvent<HTMLFormElement>) => void;
+  setOwnerName: (name: string) => void;
+  setOwnerEmail: (email: string) => void;
 }
 
 export function ConfirmTripModal({
+  destination,
+  eventStartAndEndDates,
   closeConfirmTripModal,
   createTrip,
+  setOwnerName,
+  setOwnerEmail,
 }: ConfirmTripModalProps) {
+  const displayedDate =
+    eventStartAndEndDates?.from && eventStartAndEndDates?.to
+      ? `${format(eventStartAndEndDates.from, "d' de 'MMMM' de 'yyyy", {
+          locale: ptBR,
+        })} a ${format(eventStartAndEndDates.to, "d' de 'MMMM' de 'yyyy", {
+          locale: ptBR,
+        })}`
+      : null;
+
   return (
     <Modal
       closeAction={closeConfirmTripModal}
@@ -20,13 +40,9 @@ export function ConfirmTripModal({
       subtitle={
         <>
           Para concluir a criação da viagem para{" "}
-          <span className="text-zinc-100 font-semibold">
-            Florianópolis, Brasil
-          </span>{" "}
-          nas datas de{" "}
-          <span className="text-zinc-100 font-semibold">
-            16 a 27 de Agosto de 2024
-          </span>{" "}
+          <span className="text-zinc-100 font-semibold">{destination}</span> nas
+          datas de{" "}
+          <span className="text-zinc-100 font-semibold">{displayedDate}</span>{" "}
           preencha seus dados abaixo:
         </>
       }
@@ -34,11 +50,20 @@ export function ConfirmTripModal({
         <form onSubmit={createTrip} className="space-y-3">
           <div className="h-14 px-4 bg-zinc-950 border border-zinc-800 rounded-lg flex items-center gap-2">
             <User className="text-zinc-400 size-5" />
-            <Input name="name" placeholder="Seu nome completo" />
+            <Input
+              onChange={(event) => setOwnerName(event.target.value)}
+              name="name"
+              placeholder="Seu nome completo"
+            />
           </div>
           <div className="h-14 px-4 bg-zinc-950 border border-zinc-800 rounded-lg flex items-center gap-2">
             <User className="text-zinc-400 size-5" />
-            <Input type="email" name="email" placeholder="Seu e-mail pessoal" />
+            <Input
+              onChange={(event) => setOwnerEmail(event.target.value)}
+              type="email"
+              name="email"
+              placeholder="Seu e-mail pessoal"
+            />
           </div>
           <Button type="submit" size="full">
             Confirmar criação da viagem
