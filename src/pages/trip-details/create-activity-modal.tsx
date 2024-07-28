@@ -105,7 +105,7 @@ export function CreateActivityModal({
               />
             </div>
           </div>
-          <Button type="submit" size="full">
+          <Button type="submit" size="full" variant="primary">
             Salvar atividade
           </Button>
         </form>

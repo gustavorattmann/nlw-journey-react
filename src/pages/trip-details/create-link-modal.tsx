@@ -71,7 +71,7 @@ export function CreateLinkModal({
               <Input name="url" placeholder="URL" defaultValue={link?.url} />
             </div>
           </div>
-          <Button type="submit" size="full">
+          <Button type="submit" size="full" variant="primary">
             Salvar link
           </Button>
         </form>

@@ -3,24 +3,34 @@ import { Button } from "../../components/button";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { api } from "../../lib/axios";
+import { InviteGuestModal } from "../create-trip/invite-guest-modal";
 
 interface Participants {
   id: string;
   name: string | null;
   email: string;
   is_confirmed: boolean;
+  is_owner: boolean;
 }
 
 export function Guests() {
   const { tripId } = useParams();
 
   const [participants, setParticipants] = useState<Participants[]>();
+  const [reloadParticipants, setReloadParticipants] = useState(false);
+  const [isEditGuest, setIsEditGuest] = useState(false);
+
+  function openCloseEditGuestModal() {
+    setIsEditGuest(!isEditGuest);
+  }
 
   useEffect(() => {
     api
       .get(`/trips/${tripId}/participants`)
       .then((response) => setParticipants(response.data.participants));
-  }, [tripId]);
+
+    setReloadParticipants(false);
+  }, [tripId, reloadParticipants]);
 
   return (
     <div className="space-y-6">
@@ -49,10 +59,19 @@ export function Guests() {
           );
         })}
       </div>
-      <Button variant="secondary" size="full">
+      <Button onClick={openCloseEditGuestModal} variant="secondary" size="full">
         <UserCog className="size-5" />
         Gerenciar convidados
       </Button>
+      {isEditGuest && (
+        <InviteGuestModal
+          isEdit={isEditGuest}
+          tripId={tripId}
+          participants={participants}
+          closeGuestModal={openCloseEditGuestModal}
+          setReloadParticipants={setReloadParticipants}
+        />
+      )}
     </div>
   );
 }

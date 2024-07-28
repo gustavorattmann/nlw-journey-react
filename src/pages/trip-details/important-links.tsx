@@ -19,18 +19,18 @@ export function ImportantLinks() {
   const [isCreateLinkModalOpen, setIsCreateLinkModalOpen] = useState(false);
   const [isEditLink, setIsEditLink] = useState(false);
 
-  function openCloseEditLinkModal(link: Links | undefined) {
-    setIsEditLink(!isEditLink);
-    setLink(link);
-  }
-
-  function openCreateLinkModal() {
+  function openCreateLinkModal(link: Links | undefined) {
     setIsCreateLinkModalOpen(true);
+    if (link) {
+      setIsEditLink(true);
+      setLink(link);
+    }
   }
 
   function closeCreateLinkModal() {
     setIsCreateLinkModalOpen(false);
-    openCloseEditLinkModal(undefined);
+    setIsEditLink(false);
+    setLink(undefined);
   }
 
   async function deleteLink(link: Links | undefined) {
@@ -65,7 +65,7 @@ export function ImportantLinks() {
                   <span className="flex items-center gap-2 font-medium text-zinc-100">
                     {link.title}
                     <Pencil
-                      onClick={() => openCloseEditLinkModal(link)}
+                      onClick={() => openCreateLinkModal(link)}
                       className="size-4 cursor-pointer text-zinc-100 hover:text-zinc-400"
                     />
                   </span>
@@ -85,11 +85,15 @@ export function ImportantLinks() {
           <p className="text-zinc-500 text-sm">Nenhum link cadastrado.</p>
         )}
       </div>
-      <Button onClick={openCreateLinkModal} variant="secondary" size="full">
+      <Button
+        onClick={() => openCreateLinkModal(undefined)}
+        variant="secondary"
+        size="full"
+      >
         <Plus className="size-5" />
         Cadastrar novo link
       </Button>
-      {(isCreateLinkModalOpen || isEditLink) && (
+      {isCreateLinkModalOpen && (
         <CreateLinkModal
           isEdit={isEditLink}
           link={link}

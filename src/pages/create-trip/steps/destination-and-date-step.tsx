@@ -58,16 +58,16 @@ export function DestinationAndDateStep({
           placeholder="Para onde você vai?"
         />
       </div>
-      <button
+      <Button
         onClick={openDatePicker}
         disabled={isGuestInputOpen}
-        className="flex items-center gap-2 text-left]"
+        customClass="flex items-center gap-2 text-left"
       >
         <Calendar className="size-5 text-zinc-400" />
         <span className="text-zinc-400 text-lg flex-1">
           {displayedDate || "Quando?"}
         </span>
-      </button>
+      </Button>
       {isDatePickerOpen && (
         <Modal
           closeAction={closeDatePicker}
@@ -91,7 +91,7 @@ export function DestinationAndDateStep({
           <Settings2 className="size-5" />
         </Button>
       ) : (
-        <Button onClick={openGuestInput}>
+        <Button onClick={openGuestInput} variant="primary">
           Continuar
           <ArrowRight className="size-5" />
         </Button>

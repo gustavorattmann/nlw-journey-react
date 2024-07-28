@@ -85,15 +85,15 @@ export function ChangeTripModal({
           </div>
           <div className="flex items-center gap-2">
             <div className="h-14 flex-1 px-4 bg-zinc-950 border border-zinc-800 rounded-lg flex items-center gap-2">
-              <button
+              <Button
                 onClick={openDatePicker}
-                className="flex items-center gap-2 text-left]"
+                customClass="flex items-center gap-2 text-left"
               >
                 <Calendar className="size-5 text-zinc-400" />
                 <span className="text-zinc-400 text-lg flex-1">
                   {displayedDate || "Quando?"}
                 </span>
-              </button>
+              </Button>
               {isDatePickerOpen && (
                 <Modal
                   closeAction={closeDatePicker}
@@ -111,7 +111,7 @@ export function ChangeTripModal({
               )}
             </div>
           </div>
-          <Button onClick={changeTrip} size="full">
+          <Button onClick={changeTrip} size="full" variant="primary">
             Confirmar
           </Button>
         </>

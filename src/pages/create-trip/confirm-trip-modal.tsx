@@ -65,7 +65,7 @@ export function ConfirmTripModal({
               placeholder="Seu e-mail pessoal"
             />
           </div>
-          <Button type="submit" size="full">
+          <Button type="submit" size="full" variant="primary">
             Confirmar criação da viagem
           </Button>
         </form>
