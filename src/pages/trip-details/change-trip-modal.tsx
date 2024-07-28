@@ -7,6 +7,8 @@ import { api } from "../../lib/axios";
 import { useParams } from "react-router-dom";
 import { DateRange, DayPicker } from "react-day-picker";
 import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import "react-day-picker/dist/style.css";
 
 interface ChangeTripModalProps {
   trip:
@@ -99,6 +101,7 @@ export function ChangeTripModal({
                   title="Selecione a data"
                   content={
                     <DayPicker
+                      locale={ptBR}
                       mode="range"
                       selected={eventStartAndEndDates}
                       onSelect={setEventStartAndEndDates}

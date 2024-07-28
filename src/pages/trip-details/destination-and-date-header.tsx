@@ -1,23 +1,28 @@
-import { MapPin, Calendar, Settings2 } from "lucide-react";
+import { MapPin, Calendar, Settings2, Ban } from "lucide-react";
 import { Button } from "../../components/button";
-import { useParams } from "react-router-dom";
-import { api } from "../../lib/axios";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { format } from "date-fns";
 import { ChangeTripModal } from "./change-trip-modal";
+import { api } from "../../lib/axios";
+import { useNavigate } from "react-router-dom";
 
-interface Trip {
-  id: string;
-  destination: string;
-  starts_at: string;
-  ends_at: string;
-  is_confirmed: boolean;
+interface DestinationAndDateHeaderProps {
+  trip:
+    | {
+        id: string;
+        destination: string;
+        starts_at: string;
+        ends_at: string;
+        is_confirmed: boolean;
+      }
+    | undefined;
 }
 
-export function DestinationAndDateHeader() {
-  const { tripId } = useParams();
+export function DestinationAndDateHeader({
+  trip,
+}: DestinationAndDateHeaderProps) {
+  const navigate = useNavigate();
 
-  const [trip, setTrip] = useState<Trip | undefined>();
   const [isChangeTripModalOpen, setIsChangeTripModalOpen] = useState(false);
 
   function openChangeTripModalOpen() {
@@ -28,9 +33,9 @@ export function DestinationAndDateHeader() {
     setIsChangeTripModalOpen(false);
   }
 
-  useEffect(() => {
-    api.get(`/trips/${tripId}`).then((response) => setTrip(response.data.trip));
-  }, [tripId]);
+  async function cancelTrip() {
+    await api.delete(`/trips/${trip?.id}/cancel`).then(() => navigate("/"));
+  }
 
   const displayedDate = trip
     ? `${format(trip.starts_at, "d' de 'LLL")} até ${format(
@@ -54,6 +59,9 @@ export function DestinationAndDateHeader() {
         <Button onClick={openChangeTripModalOpen} variant="secondary">
           Alterar local/data
           <Settings2 className="size-5" />
+        </Button>
+        <Button onClick={cancelTrip} variant="danger">
+          <Ban className="size-5" /> Cancelar viagem
         </Button>
       </div>
       {isChangeTripModalOpen && (

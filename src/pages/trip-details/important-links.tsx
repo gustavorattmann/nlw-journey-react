@@ -1,4 +1,4 @@
-import { Link2, Plus } from "lucide-react";
+import { Link2, Pencil, Plus, Trash } from "lucide-react";
 import { Button } from "../../components/button";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
@@ -15,14 +15,29 @@ export function ImportantLinks() {
   const { tripId } = useParams();
 
   const [links, setLinks] = useState<Links[]>();
+  const [link, setLink] = useState<Links | undefined>();
   const [isCreateLinkModalOpen, setIsCreateLinkModalOpen] = useState(false);
+  const [isEditLink, setIsEditLink] = useState(false);
 
-  function openCreateLinkModalOpen() {
+  function openCloseEditLinkModal(link: Links | undefined) {
+    setIsEditLink(!isEditLink);
+    setLink(link);
+  }
+
+  function openCreateLinkModal() {
     setIsCreateLinkModalOpen(true);
   }
 
-  function closeCreateLinkModalOpen() {
+  function closeCreateLinkModal() {
     setIsCreateLinkModalOpen(false);
+    openCloseEditLinkModal(undefined);
+  }
+
+  async function deleteLink(link: Links | undefined) {
+    if (link)
+      await api
+        .delete(`/trips/${tripId}/links/${link?.id}`)
+        .then(() => window.document.location.reload());
   }
 
   useEffect(() => {
@@ -41,16 +56,26 @@ export function ImportantLinks() {
               key={link.id}
               className="flex items-center justify-between gap-4"
             >
-              <div className="space-y-1 5">
-                <span className="block font-medium text-zinc-100">
-                  {link.title}
-                </span>
-                <a
-                  href="#"
-                  className="block text-xs text-zinc-400 truncate hover:text-zinc-200"
-                >
-                  {link.url}
-                </a>
+              <div className="flex items-center gap-4">
+                <Trash
+                  onClick={() => deleteLink(link)}
+                  className="text-zinc-100 hover:text-zinc-400 size-5 shrink-0 cursor-pointer"
+                />
+                <div className="space-y-1">
+                  <span className="flex items-center gap-2 font-medium text-zinc-100">
+                    {link.title}
+                    <Pencil
+                      onClick={() => openCloseEditLinkModal(link)}
+                      className="size-4 cursor-pointer text-zinc-100 hover:text-zinc-400"
+                    />
+                  </span>
+                  <a
+                    href={link.url}
+                    className="block text-xs text-zinc-400 truncate hover:text-zinc-200"
+                  >
+                    {link.url}
+                  </a>
+                </div>
               </div>
               <Link2 className="text-zinc-400 size-5 shrink-0" />
             </div>
@@ -60,12 +85,16 @@ export function ImportantLinks() {
           <p className="text-zinc-500 text-sm">Nenhum link cadastrado.</p>
         )}
       </div>
-      <Button onClick={openCreateLinkModalOpen} variant="secondary" size="full">
+      <Button onClick={openCreateLinkModal} variant="secondary" size="full">
         <Plus className="size-5" />
         Cadastrar novo link
       </Button>
-      {isCreateLinkModalOpen && (
-        <CreateLinkModal closeCreateLinkModalOpen={closeCreateLinkModalOpen} />
+      {(isCreateLinkModalOpen || isEditLink) && (
+        <CreateLinkModal
+          isEdit={isEditLink}
+          link={link}
+          closeCreateLinkModalOpen={closeCreateLinkModal}
+        />
       )}
     </div>
   );

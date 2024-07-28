@@ -1,10 +1,11 @@
 import { ArrowRight, Calendar, MapPin, Settings2 } from "lucide-react";
 import { Button } from "../../../components/button";
 import { Input } from "../../../components/input";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Modal } from "../../../components/modal";
 import { DateRange, DayPicker } from "react-day-picker";
-import { format } from "date-fns";
+import { add, format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import "react-day-picker/dist/style.css";
 
 interface DestinationAndDateStepProps {
@@ -42,6 +43,11 @@ export function DestinationAndDateStep({
         )}`
       : null;
 
+  useEffect(() => {
+    if (eventStartAndEndDates?.from && eventStartAndEndDates?.to)
+      closeDatePicker();
+  }, [eventStartAndEndDates]);
+
   return (
     <div className="h-16 bg-zinc-900 px-4 rounded-xl flex items-center shadow-shape gap-3">
       <div className="flex items-center gap-2 flex-1">
@@ -69,9 +75,11 @@ export function DestinationAndDateStep({
           title="Selecione a data"
           content={
             <DayPicker
+              locale={ptBR}
               mode="range"
               selected={eventStartAndEndDates}
               onSelect={setEventStartAndEndDates}
+              disabled={{ before: add(new Date(), { days: 1 }) }}
             />
           }
         />
