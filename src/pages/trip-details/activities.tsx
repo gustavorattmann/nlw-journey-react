@@ -45,6 +45,31 @@ export function Activities({ trip }: ActivitiesProps) {
   const [isEditActivity, setIsEditActivity] = useState<boolean>(false);
   const [isConfirmation, setIsConfirmation] = useState<boolean>(false);
   const [isReloadActivity, setIsReloadActivity] = useState<boolean>(false);
+  const [loading, setLoading] = useState<{
+    open: boolean;
+    message: string;
+  }>({
+    open: false,
+    message: "",
+  });
+  const [success, setSuccess] = useState<{
+    open: boolean;
+    message: string;
+    action: () => void;
+  }>({
+    open: false,
+    message: "",
+    action: () => {},
+  });
+  const [error, setError] = useState<{
+    open: boolean;
+    message: string;
+    action: () => void;
+  }>({
+    open: false,
+    message: "",
+    action: () => {},
+  });
 
   function openCreateActivityModalOpen(activity: Activity | undefined) {
     setIsCreateActivityModalOpen(true);
@@ -74,12 +99,41 @@ export function Activities({ trip }: ActivitiesProps) {
     setActivity(undefined);
   }
 
+  function closeSuccessAction() {
+    success.action();
+    setSuccess({ open: false, message: "", action: () => {} });
+  }
+
+  function closeErrorAction() {
+    error.action();
+    setError({ open: false, message: "", action: () => {} });
+  }
+
   async function deleteActivity() {
-    if (activity)
-      await api.delete(`/trips/${tripId}/activity/${activity.id}`).then(() => {
-        setIsReloadActivity(true);
-        openCloseModalConfirmation(undefined);
-      });
+    if (activity) {
+      setLoading({ open: true, message: "Aguarde..." });
+
+      await api
+        .delete(`/trips/${tripId}/activity/${activity.id}`)
+        .then(() => {
+          setIsReloadActivity(true);
+          openCloseModalConfirmation(undefined);
+          setLoading({ open: false, message: "" });
+          setSuccess({
+            ...success,
+            open: true,
+            message: "Atividade removida com sucesso!",
+          });
+        })
+        .catch(() => {
+          setLoading({ open: false, message: "" });
+          setError({
+            ...error,
+            open: true,
+            message: "Não foi possível remover a atividade!",
+          });
+        });
+    }
   }
 
   useEffect(() => {
@@ -160,6 +214,11 @@ export function Activities({ trip }: ActivitiesProps) {
           trip={trip}
           closeCreateActivityModalOpen={closeCreateActivityModalOpen}
           setIsReloadActivity={setIsReloadActivity}
+          success={success}
+          error={error}
+          setLoading={setLoading}
+          setSuccess={setSuccess}
+          setError={setError}
         />
       )}
       {isConfirmation && (
@@ -167,6 +226,21 @@ export function Activities({ trip }: ActivitiesProps) {
           type={"confirm"}
           closeAction={closeAction}
           confirmAction={confirmAction}
+        />
+      )}
+      {loading.open && <Modal type="loading" text={loading.message} />}
+      {success.open && (
+        <Modal
+          type="success"
+          text={success.message}
+          closeAction={closeSuccessAction}
+        />
+      )}
+      {error.open && (
+        <Modal
+          type="error"
+          text={error.message}
+          closeAction={closeErrorAction}
         />
       )}
     </div>

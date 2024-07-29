@@ -27,6 +27,31 @@ export function DestinationAndDateHeader({
   const [isChangeTripModalOpen, setIsChangeTripModalOpen] =
     useState<boolean>(false);
   const [isConfirmation, setIsConfirmation] = useState<boolean>(false);
+  const [loading, setLoading] = useState<{
+    open: boolean;
+    message: string;
+  }>({
+    open: false,
+    message: "",
+  });
+  const [success, setSuccess] = useState<{
+    open: boolean;
+    message: string;
+    action: () => void;
+  }>({
+    open: false,
+    message: "",
+    action: () => {},
+  });
+  const [error, setError] = useState<{
+    open: boolean;
+    message: string;
+    action: () => void;
+  }>({
+    open: false,
+    message: "",
+    action: () => {},
+  });
 
   function openChangeTripModalOpen() {
     setIsChangeTripModalOpen(true);
@@ -34,10 +59,6 @@ export function DestinationAndDateHeader({
 
   function closeChangeTripModalOpen() {
     setIsChangeTripModalOpen(false);
-  }
-
-  async function cancelTrip() {
-    await api.delete(`/trips/${trip?.id}/cancel`).then(() => navigate("/"));
   }
 
   function openCloseModalConfirmation() {
@@ -50,6 +71,40 @@ export function DestinationAndDateHeader({
 
   function confirmAction() {
     cancelTrip();
+  }
+
+  function closeSuccessAction() {
+    success.action();
+    setSuccess({ open: false, message: "", action: () => {} });
+  }
+
+  function closeErrorAction() {
+    error.action();
+    setError({ open: false, message: "", action: () => {} });
+  }
+
+  async function cancelTrip() {
+    setLoading({ open: true, message: "Aguarde..." });
+
+    await api
+      .delete(`/trips/${trip?.id}/cancel`)
+      .then(() => {
+        setLoading({ open: false, message: "" });
+        setSuccess({
+          open: true,
+          message: "Viagem cancelada com sucesso!",
+          action: () => navigate("/"),
+        });
+      })
+      .catch(() => {
+        setLoading({ open: false, message: "" });
+        setError({
+          ...error,
+          open: true,
+          message:
+            "Não foi possível cancelar a viagem.\nTente novamente mais tarde!",
+        });
+      });
   }
 
   const displayedDate = trip
@@ -83,6 +138,10 @@ export function DestinationAndDateHeader({
         <ChangeTripModal
           trip={trip}
           closeChangeTripModalOpen={closeChangeTripModalOpen}
+          error={error}
+          setLoading={setLoading}
+          setSuccess={setSuccess}
+          setError={setError}
         />
       )}
       {isConfirmation && (
@@ -90,6 +149,21 @@ export function DestinationAndDateHeader({
           type="confirm"
           closeAction={closeAction}
           confirmAction={confirmAction}
+        />
+      )}
+      {loading.open && <Modal type="loading" text={loading.message} />}
+      {success.open && (
+        <Modal
+          type="success"
+          text={success.message}
+          closeAction={closeSuccessAction}
+        />
+      )}
+      {error.open && (
+        <Modal
+          type="error"
+          text={error.message}
+          closeAction={closeErrorAction}
         />
       )}
     </div>

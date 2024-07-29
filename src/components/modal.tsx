@@ -108,7 +108,8 @@ export function Modal({
               <div className="flex flex-col items-center justify-center">
                 <CircleX className="size-40 text-red-700 mb-2 " />
                 <span className="text-center text-xl font-bold text-wrap whitespace-pre px-10">
-                  {text}
+                  {text ||
+                    "Ocorreu um erro inesperado.\nTente novamente mais tarde!"}
                 </span>
               </div>
             ) : (

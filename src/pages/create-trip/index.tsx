@@ -32,16 +32,20 @@ export function CreateTripPage() {
   const [success, setSuccess] = useState<{
     open: boolean;
     message: string;
+    action: () => void;
   }>({
     open: false,
     message: "",
+    action: () => {},
   });
   const [error, setError] = useState<{
     open: boolean;
     message: string;
+    action: () => void;
   }>({
     open: false,
     message: "",
+    action: () => {},
   });
 
   function openGuestInput() {
@@ -69,11 +73,13 @@ export function CreateTripPage() {
   }
 
   function closeSuccessAction() {
-    window.document.location.reload();
+    success.action();
+    setSuccess({ open: false, message: "", action: () => {} });
   }
 
   function closeErrorAction() {
-    setError({ open: false, message: "" });
+    error.action();
+    setError({ open: false, message: "", action: () => {} });
   }
 
   function addNewEmailToInvite(event: FormEvent<HTMLFormElement>) {
@@ -107,32 +113,35 @@ export function CreateTripPage() {
     if (emailsToInvite.length === 0) return;
     if (!ownerName || !ownerEmail) return;
 
-    const response = await api.post("/trips", {
-      destination,
-      starts_at: eventStartAndEndDates.from,
-      ends_at: eventStartAndEndDates.to,
-      emails_to_invite: emailsToInvite,
-      owner_name: ownerName,
-      owner_email: ownerEmail,
-    });
-
-    const { tripId } = response.data;
-
-    setLoading({ open: false, message: "" });
-
-    if (tripId) {
-      setSuccess({
-        open: true,
-        message:
-          "Acesse sua conta de e-mail para realizar a confirmação da viagem!",
+    await api
+      .post("/trips", {
+        destination,
+        starts_at: eventStartAndEndDates.from,
+        ends_at: eventStartAndEndDates.to,
+        emails_to_invite: emailsToInvite,
+        owner_name: ownerName,
+        owner_email: ownerEmail,
+      })
+      .then(() => {
+        setLoading({ open: false, message: "" });
+        setSuccess({
+          open: true,
+          message:
+            "Acesse sua conta de e-mail para realizar a confirmação da viagem!",
+          action: () => window.document.location.reload(),
+        });
+      })
+      .catch((err) => {
+        setLoading({ open: false, message: "" });
+        setError({
+          ...error,
+          open: true,
+          message:
+            err.response.status === 400
+              ? "Campo(s) inválido(s)!"
+              : "Não foi possível criar a viagem.\nTente novamente mais tarde!",
+        });
       });
-    } else {
-      setError({
-        open: true,
-        message:
-          "Não foi possível criar a viagem.\nTente novamente mais tarde!",
-      });
-    }
   }
 
   return (

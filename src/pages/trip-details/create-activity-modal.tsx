@@ -2,7 +2,7 @@ import { Calendar, Tag } from "lucide-react";
 import { Button } from "../../components/button";
 import { Input } from "../../components/input";
 import { Modal } from "../../components/modal";
-import { FormEvent, useState } from "react";
+import { FormEvent } from "react";
 import { api } from "../../lib/axios";
 import { useParams } from "react-router-dom";
 import { formatInTimeZone } from "date-fns-tz";
@@ -26,6 +26,27 @@ interface CreateActivityModalProps {
     | undefined;
   setIsReloadActivity: (isReloadActivity: boolean) => void;
   closeCreateActivityModalOpen: () => void;
+  success: {
+    open: boolean;
+    message: string;
+    action: () => void;
+  };
+  error: {
+    open: boolean;
+    message: string;
+    action: () => void;
+  };
+  setLoading: (loading: { open: boolean; message: string }) => void;
+  setSuccess: (success: {
+    open: boolean;
+    message: string;
+    action: () => void;
+  }) => void;
+  setError: (error: {
+    open: boolean;
+    message: string;
+    action: () => void;
+  }) => void;
 }
 
 export function CreateActivityModal({
@@ -34,17 +55,13 @@ export function CreateActivityModal({
   trip,
   setIsReloadActivity,
   closeCreateActivityModalOpen,
+  success,
+  error,
+  setLoading,
+  setSuccess,
+  setError,
 }: CreateActivityModalProps) {
   const { tripId } = useParams();
-
-  const [loading, setLoading] = useState<{
-    open: boolean;
-    message: string;
-  }>({
-    open: false,
-    message: "",
-  });
-  // const [isSuccess, setIsSuccess] = useState<boolean>(false);
 
   function changeTimezone(date: string | undefined) {
     if (date) {
@@ -62,7 +79,7 @@ export function CreateActivityModal({
   async function createActivity(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    setLoading({ open: true, message: "Criando viagem..." });
+    setLoading({ open: true, message: "Aguarde..." });
 
     const data = new FormData(event.currentTarget);
 
@@ -76,8 +93,24 @@ export function CreateActivityModal({
           occurs_at,
         })
         .then(() => {
-          setLoading({ open: false, message: "" });
           setIsReloadActivity(true);
+          setLoading({ open: false, message: "" });
+          setSuccess({
+            ...success,
+            open: true,
+            message: "Atividade atualizada com sucesso!",
+          });
+        })
+        .catch((err) => {
+          setLoading({ open: false, message: "" });
+          setError({
+            ...error,
+            open: true,
+            message:
+              err.response.status === 400
+                ? "Campo(s) inválido(s)!"
+                : "Não foi possível criar a atividade.\nTente novamente mais tarde!",
+          });
         });
     } else {
       await api
@@ -86,8 +119,21 @@ export function CreateActivityModal({
           occurs_at,
         })
         .then(() => {
-          setLoading({ open: false, message: "" });
           setIsReloadActivity(true);
+          setLoading({ open: false, message: "" });
+          setSuccess({
+            ...success,
+            open: true,
+            message: "Atividade incluída com sucesso!",
+          });
+        })
+        .catch((err) => {
+          setLoading({ open: false, message: "" });
+          setError({
+            ...error,
+            open: true,
+            message: err.response.status === 400 ? "Campo(s) inválido(s)!" : "",
+          });
         });
     }
   }
@@ -133,7 +179,6 @@ export function CreateActivityModal({
           </form>
         }
       />
-      {loading.open && <Modal type="loading" text={loading.message} />}
     </div>
   );
 }

@@ -17,6 +17,27 @@ interface CreateLinkModalProps {
     | undefined;
   closeCreateLinkModalOpen: () => void;
   setIsReloadLink: (isReloadLink: true) => void;
+  success: {
+    open: boolean;
+    message: string;
+    action: () => void;
+  };
+  error: {
+    open: boolean;
+    message: string;
+    action: () => void;
+  };
+  setLoading: (loading: { open: boolean; message: string }) => void;
+  setSuccess: (success: {
+    open: boolean;
+    message: string;
+    action: () => void;
+  }) => void;
+  setError: (error: {
+    open: boolean;
+    message: string;
+    action: () => void;
+  }) => void;
 }
 
 export function CreateLinkModal({
@@ -24,11 +45,18 @@ export function CreateLinkModal({
   link,
   closeCreateLinkModalOpen,
   setIsReloadLink,
+  success,
+  error,
+  setLoading,
+  setSuccess,
+  setError,
 }: CreateLinkModalProps) {
   const { tripId } = useParams();
 
   async function createLink(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    setLoading({ open: true, message: "Aguarde..." });
 
     const data = new FormData(event.currentTarget);
 
@@ -41,14 +69,49 @@ export function CreateLinkModal({
           title,
           url,
         })
-        .then(() => setIsReloadLink(true));
+        .then(() => {
+          setIsReloadLink(true);
+          setLoading({ open: false, message: "" });
+          setSuccess({
+            ...success,
+            open: true,
+            message: "Link atualizado com sucesso!",
+          });
+        })
+        .catch((err) => {
+          setLoading({ open: false, message: "" });
+          setError({
+            ...error,
+            open: true,
+            message:
+              err.response.status === 400
+                ? "Campo(s) inválido(s)!"
+                : "Não foi possível criar o link.\nTente novamente mais tarde!",
+          });
+        });
     } else {
       await api
         .post(`/trips/${tripId}/links`, {
           title,
           url,
         })
-        .then(() => setIsReloadLink(true));
+        .then(() => {
+          setIsReloadLink(true);
+          setLoading({ open: false, message: "" });
+          setSuccess({
+            ...success,
+            open: true,
+            message: "Link incluído com sucesso!",
+          });
+        })
+        .catch((err) => {
+          setLoading({ open: false, message: "" });
+          setError({
+            ...error,
+            open: true,
+            message: err.response.status === 400 ? "Campo(s) inválido(s)!" : "",
+          });
+        });
     }
   }
 

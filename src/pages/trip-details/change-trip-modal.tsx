@@ -21,11 +21,31 @@ interface ChangeTripModalProps {
       }
     | undefined;
   closeChangeTripModalOpen: () => void;
+  error: {
+    open: boolean;
+    message: string;
+    action: () => void;
+  };
+  setLoading: (loading: { open: boolean; message: string }) => void;
+  setSuccess: (success: {
+    open: boolean;
+    message: string;
+    action: () => void;
+  }) => void;
+  setError: (error: {
+    open: boolean;
+    message: string;
+    action: () => void;
+  }) => void;
 }
 
 export function ChangeTripModal({
   trip,
   closeChangeTripModalOpen,
+  error,
+  setLoading,
+  setSuccess,
+  setError,
 }: ChangeTripModalProps) {
   const { tripId } = useParams();
 
@@ -49,16 +69,47 @@ export function ChangeTripModal({
   }
 
   async function changeTrip() {
-    if (!destination) return;
-    if (!eventStartAndEndDates?.from || !eventStartAndEndDates?.to) return;
+    setLoading({ open: true, message: "Aguarde..." });
 
-    await api.put(`/trips/${tripId}`, {
-      destination,
-      starts_at: eventStartAndEndDates.from,
-      ends_at: eventStartAndEndDates.to,
-    });
+    if (
+      !destination ||
+      !eventStartAndEndDates?.from ||
+      !eventStartAndEndDates?.to
+    ) {
+      setLoading({ open: false, message: "" });
+      setError({
+        ...error,
+        open: true,
+        message: "Não foi possível cancelar a viagem!",
+      });
+      return;
+    }
 
-    window.document.location.reload();
+    await api
+      .put(`/trips/${tripId}`, {
+        destination,
+        starts_at: eventStartAndEndDates.from,
+        ends_at: eventStartAndEndDates.to,
+      })
+      .then(() => {
+        setLoading({ open: false, message: "" });
+        setSuccess({
+          open: true,
+          message: "Viagem alterada com sucesso!",
+          action: () => window.document.location.reload(),
+        });
+      })
+      .catch((err) => {
+        setLoading({ open: false, message: "" });
+        setError({
+          ...error,
+          open: true,
+          message:
+            err.response.status === 400
+              ? "Campo(s) inválido(s)!"
+              : "Não foi possível cancelar a viagem.\nTente novamente mais tarde!",
+        });
+      });
   }
 
   const displayedDate =

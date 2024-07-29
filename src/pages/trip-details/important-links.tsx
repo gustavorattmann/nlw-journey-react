@@ -21,6 +21,31 @@ export function ImportantLinks() {
   const [isConfirmation, setIsConfirmation] = useState<boolean>(false);
   const [isReloadLink, setIsReloadLink] = useState<boolean>(false);
   const [isEditLink, setIsEditLink] = useState(false);
+  const [loading, setLoading] = useState<{
+    open: boolean;
+    message: string;
+  }>({
+    open: false,
+    message: "",
+  });
+  const [success, setSuccess] = useState<{
+    open: boolean;
+    message: string;
+    action: () => void;
+  }>({
+    open: false,
+    message: "",
+    action: () => {},
+  });
+  const [error, setError] = useState<{
+    open: boolean;
+    message: string;
+    action: () => void;
+  }>({
+    open: false,
+    message: "",
+    action: () => {},
+  });
 
   function openCreateLinkModal(link: Links | undefined) {
     setIsCreateLinkModalOpen(true);
@@ -50,11 +75,38 @@ export function ImportantLinks() {
     setLink(undefined);
   }
 
+  function closeSuccessAction() {
+    success.action();
+    setSuccess({ open: false, message: "", action: () => {} });
+  }
+
+  function closeErrorAction() {
+    error.action();
+    setError({ open: false, message: "", action: () => {} });
+  }
+
   async function deleteLink() {
-    if (link)
-      await api.delete(`/trips/${tripId}/links/${link?.id}`).then(() => {
+    if (link) setLoading({ open: true, message: "Aguarde..." });
+
+    await api
+      .delete(`/trips/${tripId}/links/${link?.id}`)
+      .then(() => {
         setIsReloadLink(true);
         openCloseModalConfirmation(undefined);
+        setLoading({ open: false, message: "" });
+        setSuccess({
+          ...success,
+          open: true,
+          message: "Link removido com sucesso!",
+        });
+      })
+      .catch(() => {
+        setLoading({ open: false, message: "" });
+        setError({
+          ...error,
+          open: true,
+          message: "Não foi possível remover o link!",
+        });
       });
   }
 
@@ -123,6 +175,11 @@ export function ImportantLinks() {
           link={link}
           setIsReloadLink={setIsReloadLink}
           closeCreateLinkModalOpen={closeCreateLinkModal}
+          success={success}
+          error={error}
+          setLoading={setLoading}
+          setSuccess={setSuccess}
+          setError={setError}
         />
       )}
       {isConfirmation && (
@@ -130,6 +187,21 @@ export function ImportantLinks() {
           type="confirm"
           closeAction={closeAction}
           confirmAction={confirmAction}
+        />
+      )}
+      {loading.open && <Modal type="loading" text={loading.message} />}
+      {success.open && (
+        <Modal
+          type="success"
+          text={success.message}
+          closeAction={closeSuccessAction}
+        />
+      )}
+      {error.open && (
+        <Modal
+          type="error"
+          text={error.message}
+          closeAction={closeErrorAction}
         />
       )}
     </div>
