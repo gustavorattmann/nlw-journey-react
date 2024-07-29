@@ -16,12 +16,14 @@ interface CreateLinkModalProps {
       }
     | undefined;
   closeCreateLinkModalOpen: () => void;
+  setIsReloadLink: (isReloadLink: true) => void;
 }
 
 export function CreateLinkModal({
   isEdit,
   link,
   closeCreateLinkModalOpen,
+  setIsReloadLink,
 }: CreateLinkModalProps) {
   const { tripId } = useParams();
 
@@ -34,18 +36,20 @@ export function CreateLinkModal({
     const url = data.get("url")?.toString();
 
     if (isEdit) {
-      await api.put(`/trips/${tripId}/links/${link?.id}`, {
-        title,
-        url,
-      });
+      await api
+        .put(`/trips/${tripId}/links/${link?.id}`, {
+          title,
+          url,
+        })
+        .then(() => setIsReloadLink(true));
     } else {
-      await api.post(`/trips/${tripId}/links`, {
-        title,
-        url,
-      });
+      await api
+        .post(`/trips/${tripId}/links`, {
+          title,
+          url,
+        })
+        .then(() => setIsReloadLink(true));
     }
-
-    window.document.location.reload();
   }
 
   return (

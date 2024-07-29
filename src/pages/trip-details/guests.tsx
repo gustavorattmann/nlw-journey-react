@@ -17,7 +17,8 @@ export function Guests() {
   const { tripId } = useParams();
 
   const [participants, setParticipants] = useState<Participants[]>();
-  const [reloadParticipants, setReloadParticipants] = useState(false);
+  const [isReloadParticipants, setIsReloadParticipants] =
+    useState<boolean>(false);
   const [isEditGuest, setIsEditGuest] = useState(false);
 
   function openCloseEditGuestModal() {
@@ -29,8 +30,8 @@ export function Guests() {
       .get(`/trips/${tripId}/participants`)
       .then((response) => setParticipants(response.data.participants));
 
-    setReloadParticipants(false);
-  }, [tripId, reloadParticipants]);
+    setIsReloadParticipants(false);
+  }, [tripId, isReloadParticipants]);
 
   return (
     <div className="space-y-6">
@@ -69,7 +70,7 @@ export function Guests() {
           tripId={tripId}
           participants={participants}
           closeGuestModal={openCloseEditGuestModal}
-          setReloadParticipants={setReloadParticipants}
+          setIsReloadParticipants={setIsReloadParticipants}
         />
       )}
     </div>

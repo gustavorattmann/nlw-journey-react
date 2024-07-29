@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { ChangeTripModal } from "./change-trip-modal";
 import { api } from "../../lib/axios";
 import { useNavigate } from "react-router-dom";
+import { Modal } from "../../components/modal";
 
 interface DestinationAndDateHeaderProps {
   trip:
@@ -23,7 +24,9 @@ export function DestinationAndDateHeader({
 }: DestinationAndDateHeaderProps) {
   const navigate = useNavigate();
 
-  const [isChangeTripModalOpen, setIsChangeTripModalOpen] = useState(false);
+  const [isChangeTripModalOpen, setIsChangeTripModalOpen] =
+    useState<boolean>(false);
+  const [isConfirmation, setIsConfirmation] = useState<boolean>(false);
 
   function openChangeTripModalOpen() {
     setIsChangeTripModalOpen(true);
@@ -35,6 +38,18 @@ export function DestinationAndDateHeader({
 
   async function cancelTrip() {
     await api.delete(`/trips/${trip?.id}/cancel`).then(() => navigate("/"));
+  }
+
+  function openCloseModalConfirmation() {
+    setIsConfirmation(!isConfirmation);
+  }
+
+  function closeAction() {
+    setIsConfirmation(false);
+  }
+
+  function confirmAction() {
+    cancelTrip();
   }
 
   const displayedDate = trip
@@ -60,7 +75,7 @@ export function DestinationAndDateHeader({
           Alterar local/data
           <Settings2 className="size-5" />
         </Button>
-        <Button onClick={cancelTrip} variant="danger">
+        <Button onClick={openCloseModalConfirmation} variant="danger">
           <Ban className="size-5" /> Cancelar viagem
         </Button>
       </div>
@@ -68,6 +83,13 @@ export function DestinationAndDateHeader({
         <ChangeTripModal
           trip={trip}
           closeChangeTripModalOpen={closeChangeTripModalOpen}
+        />
+      )}
+      {isConfirmation && (
+        <Modal
+          type="confirm"
+          closeAction={closeAction}
+          confirmAction={confirmAction}
         />
       )}
     </div>

@@ -1,28 +1,48 @@
 import { FormEvent, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { InviteGuestModal } from "./invite-guest-modal";
 import { ConfirmTripModal } from "./confirm-trip-modal";
 import { DestinationAndDateStep } from "./steps/destination-and-date-step";
 import { InviteGuestsStep } from "./steps/invite-guests-step";
 import { DateRange } from "react-day-picker";
 import { api } from "../../lib/axios";
+import { Modal } from "../../components/modal";
 
 export function CreateTripPage() {
-  const navigate = useNavigate();
-
-  const [isGuestInputOpen, setIsGuestInputOpen] = useState(false);
-  const [isGuestModalOpen, setIsGuestModalOpen] = useState(false);
-  const [isConfirmTripModalOpen, setIsConfirmTripModalOpen] = useState(false);
-  const [destination, setDestination] = useState("");
-  const [ownerName, setOwnerName] = useState("");
-  const [ownerEmail, setOwnerEmail] = useState("");
+  const [isGuestInputOpen, setIsGuestInputOpen] = useState<boolean>(false);
+  const [isGuestModalOpen, setIsGuestModalOpen] = useState<boolean>(false);
+  const [isConfirmTripModalOpen, setIsConfirmTripModalOpen] =
+    useState<boolean>(false);
+  const [destination, setDestination] = useState<string>("");
+  const [ownerName, setOwnerName] = useState<string>("");
+  const [ownerEmail, setOwnerEmail] = useState<string>("");
   const [eventStartAndEndDates, setEventStartAndEndDates] = useState<
     DateRange | undefined
   >();
-  const [emailsToInvite, setEmailsToInvite] = useState([
+  const [emailsToInvite, setEmailsToInvite] = useState<string[]>([
     "diego@rocketseat.com.br",
     "john@acme.com",
   ]);
+  const [loading, setLoading] = useState<{
+    open: boolean;
+    message: string;
+  }>({
+    open: false,
+    message: "",
+  });
+  const [success, setSuccess] = useState<{
+    open: boolean;
+    message: string;
+  }>({
+    open: false,
+    message: "",
+  });
+  const [error, setError] = useState<{
+    open: boolean;
+    message: string;
+  }>({
+    open: false,
+    message: "",
+  });
 
   function openGuestInput() {
     setIsGuestInputOpen(true);
@@ -46,6 +66,14 @@ export function CreateTripPage() {
 
   function closeConfirmTripModal() {
     setIsConfirmTripModalOpen(false);
+  }
+
+  function closeSuccessAction() {
+    window.document.location.reload();
+  }
+
+  function closeErrorAction() {
+    setError({ open: false, message: "" });
   }
 
   function addNewEmailToInvite(event: FormEvent<HTMLFormElement>) {
@@ -72,6 +100,8 @@ export function CreateTripPage() {
   async function createTrip(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
+    setLoading({ open: true, message: "Criando viagem..." });
+
     if (!destination) return;
     if (!eventStartAndEndDates?.from || !eventStartAndEndDates?.to) return;
     if (emailsToInvite.length === 0) return;
@@ -88,7 +118,21 @@ export function CreateTripPage() {
 
     const { tripId } = response.data;
 
-    navigate(`/trips/${tripId}`);
+    setLoading({ open: false, message: "" });
+
+    if (tripId) {
+      setSuccess({
+        open: true,
+        message:
+          "Acesse sua conta de e-mail para realizar a confirmação da viagem!",
+      });
+    } else {
+      setError({
+        open: true,
+        message:
+          "Não foi possível criar a viagem.\nTente novamente mais tarde!",
+      });
+    }
   }
 
   return (
@@ -146,6 +190,21 @@ export function CreateTripPage() {
           setOwnerEmail={setOwnerEmail}
           destination={destination}
           eventStartAndEndDates={eventStartAndEndDates}
+        />
+      )}
+      {loading.open && <Modal type="loading" text={loading.message} />}
+      {success.open && (
+        <Modal
+          type="success"
+          text={success.message}
+          closeAction={closeSuccessAction}
+        />
+      )}
+      {error.open && (
+        <Modal
+          type="error"
+          text={error.message}
+          closeAction={closeErrorAction}
         />
       )}
     </div>

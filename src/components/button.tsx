@@ -10,7 +10,8 @@ const buttonVariants = tv({
       transparent: "bg-transparent p-0",
       primary: "bg-lime-300 text-lime-900 hover:bg-lime-400",
       secondary: "bg-zinc-800 text-zinc-200 hover:bg-zinc-700",
-      danger: "bg-rose-800 text-zinc-200 hover:bg-rose-700",
+      danger: "bg-rose-800 text-zinc-200 hover:bg-rose-600",
+      confirm: "bg-sky-800 text-zinc-200 hover:bg-sky-700",
     },
     size: {
       default: "py-2",

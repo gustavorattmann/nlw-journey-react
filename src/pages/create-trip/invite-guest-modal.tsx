@@ -16,7 +16,7 @@ interface InviteGuestModalProps {
     is_confirmed: boolean;
     is_owner: boolean;
   }[];
-  setReloadParticipants?: (reloadParticipants: boolean) => void;
+  setIsReloadParticipants?: (isReloadParticipants: boolean) => void;
   closeGuestModal: () => void;
   emailsToInvite?: string[];
   addNewEmailToInvite?: (event: FormEvent<HTMLFormElement>) => void;
@@ -27,7 +27,7 @@ export function InviteGuestModal({
   isEdit,
   tripId,
   participants,
-  setReloadParticipants,
+  setIsReloadParticipants,
   addNewEmailToInvite,
   closeGuestModal,
   emailsToInvite,
@@ -36,7 +36,7 @@ export function InviteGuestModal({
   async function cancelParticipant(id: string) {
     await api
       .delete(`/participants/${id}/cancel`)
-      .then(() => setReloadParticipants?.(true));
+      .then(() => setIsReloadParticipants?.(true));
   }
 
   async function inviteParticipant(event: FormEvent<HTMLFormElement>) {
@@ -50,7 +50,7 @@ export function InviteGuestModal({
     if (!email) return;
     await api
       .post(`/trips/${tripId}/invites`, { email })
-      .then(() => setReloadParticipants?.(true));
+      .then(() => setIsReloadParticipants?.(true));
 
     input.reset();
   }
@@ -58,7 +58,7 @@ export function InviteGuestModal({
   async function confirmParticipant(id: string) {
     await api
       .get(`/participants/${id}/confirm`)
-      .then(() => setReloadParticipants?.(true));
+      .then(() => setIsReloadParticipants?.(true));
   }
 
   return (

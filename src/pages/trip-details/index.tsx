@@ -1,13 +1,12 @@
-import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
-import { CreateActivityModal } from "./create-activity-modal";
 import { ImportantLinks } from "./important-links";
 import { Guests } from "./guests";
 import { Activities } from "./activities";
 import { DestinationAndDateHeader } from "./destination-and-date-header";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { api } from "../../lib/axios";
-import { Button } from "../../components/button";
+import { ParticipantConfirm } from "./participant-confirm";
+import { OwnerConfirm } from "./owner-confirm";
 
 interface Trip {
   id: string;
@@ -18,43 +17,36 @@ interface Trip {
 }
 
 export function TripDetailsPage() {
-  const { tripId } = useParams();
+  const { tripId, participantId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [trip, setTrip] = useState<Trip | undefined>();
-  const [isCreateActivityModalOpen, setIsCreateActivityModalOpen] =
-    useState(false);
-
-  function openCreateActivityModalOpen() {
-    setIsCreateActivityModalOpen(true);
-  }
-
-  function closeCreateActivityModalOpen() {
-    setIsCreateActivityModalOpen(false);
-  }
+  const [isParticipantConfirm, setIsParticipantConfirm] =
+    useState<boolean>(false);
+  const [isTripConfirm, setIsTripConfirm] = useState<boolean>(false);
 
   useEffect(() => {
-    api
-      .get(`/trips/${tripId}`)
-      .then((response) => setTrip(response.data.trip))
-      .catch(() => navigate("/"));
-  }, [tripId, navigate]);
+    if (location.pathname?.includes("confirm")) {
+      if (location.pathname?.includes("participants")) {
+        setIsParticipantConfirm(true);
+      } else {
+        setIsTripConfirm(true);
+      }
+    } else {
+      if (tripId)
+        api
+          .get(`/trips/${tripId}`)
+          .then((response) => setTrip(response.data.trip))
+          .catch(() => navigate("/"));
+    }
+  }, [tripId, navigate, location]);
 
   return (
     <div className="max-w-6xl px-6 py-10 mx-auto space-y-8">
       <DestinationAndDateHeader trip={trip} />
       <main className="flex gap-16 px-4">
         <div className="flex-1 space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-3xl font-semibold">Atividades</h2>
-            <Button
-              onClick={openCreateActivityModalOpen}
-              customClass="bg-lime-300 text-lime-950 rounded-lg px-5 py-2 font-medium flex items-center gap-2 hover:bg-lime-400"
-            >
-              <Plus className="size-5" />
-              Cadastrar atividade
-            </Button>
-          </div>
           <Activities trip={trip} />
         </div>
         <div className="w-80 space-y-6">
@@ -63,12 +55,10 @@ export function TripDetailsPage() {
           <Guests />
         </div>
       </main>
-      {isCreateActivityModalOpen && (
-        <CreateActivityModal
-          trip={trip}
-          closeCreateActivityModalOpen={closeCreateActivityModalOpen}
-        />
+      {isParticipantConfirm && participantId && (
+        <ParticipantConfirm participantId={participantId} />
       )}
+      {isTripConfirm && tripId && <OwnerConfirm tripId={tripId} />}
     </div>
   );
 }

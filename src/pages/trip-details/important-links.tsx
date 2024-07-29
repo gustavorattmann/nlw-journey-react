@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { api } from "../../lib/axios";
 import { CreateLinkModal } from "./create-link-modal";
+import { Modal } from "../../components/modal";
 
 interface Links {
   id: string;
@@ -17,6 +18,8 @@ export function ImportantLinks() {
   const [links, setLinks] = useState<Links[]>();
   const [link, setLink] = useState<Links | undefined>();
   const [isCreateLinkModalOpen, setIsCreateLinkModalOpen] = useState(false);
+  const [isConfirmation, setIsConfirmation] = useState<boolean>(false);
+  const [isReloadLink, setIsReloadLink] = useState<boolean>(false);
   const [isEditLink, setIsEditLink] = useState(false);
 
   function openCreateLinkModal(link: Links | undefined) {
@@ -33,18 +36,39 @@ export function ImportantLinks() {
     setLink(undefined);
   }
 
-  async function deleteLink(link: Links | undefined) {
+  function openCloseModalConfirmation(link: Links | undefined) {
+    setIsConfirmation(!isConfirmation);
+    setLink(link);
+  }
+
+  function closeAction() {
+    setIsConfirmation(false);
+  }
+
+  function confirmAction() {
+    deleteLink();
+    setLink(undefined);
+  }
+
+  async function deleteLink() {
     if (link)
-      await api
-        .delete(`/trips/${tripId}/links/${link?.id}`)
-        .then(() => window.document.location.reload());
+      await api.delete(`/trips/${tripId}/links/${link?.id}`).then(() => {
+        setIsReloadLink(true);
+        openCloseModalConfirmation(undefined);
+      });
   }
 
   useEffect(() => {
-    api
-      .get(`/trips/${tripId}/links`)
-      .then((response) => setLinks(response.data.links));
-  }, [tripId]);
+    if (tripId || isReloadLink) {
+      api
+        .get(`/trips/${tripId}/links`)
+        .then((response) => setLinks(response.data.links));
+
+      if (isReloadLink) closeCreateLinkModal();
+    }
+
+    setIsReloadLink(false);
+  }, [tripId, isReloadLink]);
 
   return (
     <div className="space-y-6">
@@ -58,7 +82,7 @@ export function ImportantLinks() {
             >
               <div className="flex items-center gap-4">
                 <Trash
-                  onClick={() => deleteLink(link)}
+                  onClick={() => openCloseModalConfirmation(link)}
                   className="text-zinc-100 hover:text-zinc-400 size-5 shrink-0 cursor-pointer"
                 />
                 <div className="space-y-1">
@@ -97,7 +121,15 @@ export function ImportantLinks() {
         <CreateLinkModal
           isEdit={isEditLink}
           link={link}
+          setIsReloadLink={setIsReloadLink}
           closeCreateLinkModalOpen={closeCreateLinkModal}
+        />
+      )}
+      {isConfirmation && (
+        <Modal
+          type="confirm"
+          closeAction={closeAction}
+          confirmAction={confirmAction}
         />
       )}
     </div>
