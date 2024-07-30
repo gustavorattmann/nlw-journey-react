@@ -8,15 +8,10 @@ export default defineConfig(({ mode }) => {
   return {
     server: {
       proxy: {
-        "/api": {
-          target:
-            env?.VITE_API_BASE_URL ||
-            "https://nlw-journey-node-yzzp.onrender.com/" ||
-            "http://localhost:3333",
-          changeOrigin: true,
-          secure: false,
-          rewrite: (path) => path.replace(/^\/api/, ""),
-        },
+        "/api":
+          env?.VITE_API_BASE_URL ||
+          "https://nlw-journey-node-yzzp.onrender.com/" ||
+          "http://localhost:3333",
       },
     },
     plugins: [react()],
