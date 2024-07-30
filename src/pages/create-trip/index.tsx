@@ -117,7 +117,7 @@ export function CreateTripPage() {
     if (!ownerName || !ownerEmail) return;
 
     await api
-      .post("/trips", {
+      .post("/api/trips", {
         destination,
         starts_at: eventStartAndEndDates.from,
         ends_at: eventStartAndEndDates.to,
