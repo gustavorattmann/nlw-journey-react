@@ -60,7 +60,7 @@ Antes de rodar o servidor, é preciso realizar alguns passos importantes para qu
 Crie um arquivo **.env** a partir do **.env.example** e faça as seguintes configurações:
 
 ```env
-API_BASE_URL - URL da API
+VITE_API_BASE_URL - URL da API
 ```
 
 Em seguida, devemos instalar os pacotes essenciais.
