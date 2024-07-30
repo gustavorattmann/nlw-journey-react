@@ -1,11 +1,10 @@
-# plann.er - NLW Journey Node.JS
+# plann.er - NLW Journey React
 
 ![Evento NLW Journey](public/NLW-Journey-Event.png "Evento NLW Journey")
 
 ## Explicação sobre o projeto
 
-Neste projeto foi criada uma API em Node.JS para realizar toda a lógica do sistema planejador de viagem. Essa API é responsável por realizar
-solicitações e retornar os dados esperados pelo solicitante (Lado cliente).
+Neste projeto foi criado um Website com React para criar uma viagem através do sistema planejador de viagem. Ele é responsável pela parte visual e por fazer requisições com o banco de dados através de uma API (Lado servidor).
 
 O usuário agenda a viagem com data e local, podendo convidar outras pessoas, que precisam confirmar ou recusar presença até a data da viagem.
 Outras ações poderão ser feitas também, como adicionar atividades relacionadas a viagem com horário em que serão feitas, adicionar links importantes, alterar
