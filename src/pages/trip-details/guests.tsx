@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { api } from "../../lib/axios";
 import { InviteGuestModal } from "../create-trip/invite-guest-modal";
+import { Modal } from "../../components/modal";
 
 interface Participants {
   id: string;
@@ -20,9 +21,44 @@ export function Guests() {
   const [isReloadParticipants, setIsReloadParticipants] =
     useState<boolean>(false);
   const [isEditGuest, setIsEditGuest] = useState(false);
+  const [loading, setLoading] = useState<{
+    open: boolean;
+    message: string;
+  }>({
+    open: false,
+    message: "",
+  });
+  const [success, setSuccess] = useState<{
+    open: boolean;
+    message: string;
+    action: () => void;
+  }>({
+    open: false,
+    message: "",
+    action: () => {},
+  });
+  const [error, setError] = useState<{
+    open: boolean;
+    message: string;
+    action: () => void;
+  }>({
+    open: false,
+    message: "",
+    action: () => {},
+  });
 
   function openCloseEditGuestModal() {
     setIsEditGuest(!isEditGuest);
+  }
+
+  function closeSuccessAction() {
+    success.action();
+    setSuccess({ open: false, message: "", action: () => {} });
+  }
+
+  function closeErrorAction() {
+    error.action();
+    setError({ open: false, message: "", action: () => {} });
   }
 
   useEffect(() => {
@@ -71,6 +107,26 @@ export function Guests() {
           participants={participants}
           closeGuestModal={openCloseEditGuestModal}
           setIsReloadParticipants={setIsReloadParticipants}
+          success={success}
+          error={error}
+          setLoading={setLoading}
+          setSuccess={setSuccess}
+          setError={setError}
+        />
+      )}
+      {loading.open && <Modal type="loading" text={loading.message} />}
+      {success.open && (
+        <Modal
+          type="success"
+          text={success.message}
+          closeAction={closeSuccessAction}
+        />
+      )}
+      {error.open && (
+        <Modal
+          type="error"
+          text={error.message}
+          closeAction={closeErrorAction}
         />
       )}
     </div>

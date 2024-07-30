@@ -6,8 +6,11 @@ import { InviteGuestsStep } from "./steps/invite-guests-step";
 import { DateRange } from "react-day-picker";
 import { api } from "../../lib/axios";
 import { Modal } from "../../components/modal";
+import { useNavigate } from "react-router-dom";
 
 export function CreateTripPage() {
+  const navigate = useNavigate();
+
   const [isGuestInputOpen, setIsGuestInputOpen] = useState<boolean>(false);
   const [isGuestModalOpen, setIsGuestModalOpen] = useState<boolean>(false);
   const [isConfirmTripModalOpen, setIsConfirmTripModalOpen] =
@@ -122,13 +125,17 @@ export function CreateTripPage() {
         owner_name: ownerName,
         owner_email: ownerEmail,
       })
-      .then(() => {
+      .then((res) => {
         setLoading({ open: false, message: "" });
         setSuccess({
           open: true,
           message:
             "Acesse sua conta de e-mail para realizar a confirmação da viagem!",
-          action: () => window.document.location.reload(),
+          action: () => {
+            const { tripId } = res.data;
+
+            navigate(`/trips/${tripId}`);
+          },
         });
       })
       .catch((err) => {

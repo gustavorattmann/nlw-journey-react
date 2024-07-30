@@ -21,6 +21,27 @@ interface InviteGuestModalProps {
   emailsToInvite?: string[];
   addNewEmailToInvite?: (event: FormEvent<HTMLFormElement>) => void;
   removeEmailFromInvite?: (email: string) => void;
+  success?: {
+    open: boolean;
+    message: string;
+    action: () => void;
+  };
+  error?: {
+    open: boolean;
+    message: string;
+    action: () => void;
+  };
+  setLoading?: (loading: { open: boolean; message: string }) => void;
+  setSuccess?: (success: {
+    open: boolean;
+    message: string;
+    action: () => void;
+  }) => void;
+  setError?: (error: {
+    open: boolean;
+    message: string;
+    action: () => void;
+  }) => void;
 }
 
 export function InviteGuestModal({
@@ -32,15 +53,32 @@ export function InviteGuestModal({
   closeGuestModal,
   emailsToInvite,
   removeEmailFromInvite,
+  success,
+  error,
+  setLoading,
+  setSuccess,
+  setError,
 }: InviteGuestModalProps) {
   async function cancelParticipant(id: string) {
     await api
       .delete(`/participants/${id}/cancel`)
-      .then(() => setIsReloadParticipants?.(true));
+      .then(() => setIsReloadParticipants?.(true))
+      .catch(() => {
+        if (error) {
+          setError?.({
+            ...error,
+            open: true,
+            message:
+              "Não foi possível cancelar o participante da viagem.\nTente novamente mais tarde!",
+          });
+        }
+      });
   }
 
   async function inviteParticipant(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    setLoading?.({ open: true, message: "Aguarde..." });
 
     const input = event.currentTarget;
 
@@ -50,15 +88,48 @@ export function InviteGuestModal({
     if (!email) return;
     await api
       .post(`/trips/${tripId}/invites`, { email })
-      .then(() => setIsReloadParticipants?.(true));
+      .then(() => {
+        setIsReloadParticipants?.(true);
+        setLoading?.({ open: false, message: "" });
+        if (success) {
+          setSuccess?.({
+            ...success,
+            open: true,
+            message: "Convite enviado com sucesso!",
+          });
+        }
 
-    input.reset();
+        input.reset();
+      })
+      .catch((err) => {
+        setLoading?.({ open: false, message: "" });
+        if (error) {
+          setError?.({
+            ...error,
+            open: true,
+            message:
+              err.response.status === 400
+                ? "Campo inválido!"
+                : "Não foi possível enviar convite.\nTente novamente mais tarde!",
+          });
+        }
+      });
   }
 
   async function confirmParticipant(id: string) {
     await api
       .get(`/participants/${id}/confirm`)
-      .then(() => setIsReloadParticipants?.(true));
+      .then(() => setIsReloadParticipants?.(true))
+      .catch(() => {
+        if (error) {
+          setError?.({
+            ...error,
+            open: true,
+            message:
+              "Não foi possível confirmar o participante.\nTente novamente mais tarde!",
+          });
+        }
+      });
   }
 
   return (
