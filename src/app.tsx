@@ -1,6 +1,7 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { CreateTripPage } from "./pages/create-trip";
 import { TripDetailsPage } from "./pages/trip-details";
+import { NotFound } from "./pages/error/not-found";
 
 const router = createBrowserRouter([
   {
@@ -18,6 +19,10 @@ const router = createBrowserRouter([
   {
     path: "/participants/:participantId/confirm",
     element: <TripDetailsPage />,
+  },
+  {
+    path: "*",
+    element: <NotFound />,
   },
 ]);
 
