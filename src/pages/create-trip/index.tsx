@@ -52,7 +52,13 @@ export function CreateTripPage() {
   });
 
   function openGuestInput() {
-    setIsGuestInputOpen(true);
+    if (!destination) {
+      setError({ ...error, open: true, message: "Campo de destino inválido!" });
+    } else if (!eventStartAndEndDates?.from || !eventStartAndEndDates?.to) {
+      setError({ ...error, open: true, message: "Campo de data inválido!" });
+    } else {
+      setIsGuestInputOpen(true);
+    }
   }
 
   function closeGuestInput() {
