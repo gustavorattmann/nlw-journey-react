@@ -4,5 +4,5 @@ export const api = axios.create({
   baseURL:
     import.meta.env?.VITE_API_BASE_URL ||
     "https://nlw-journey-node-yzzp.onrender.com" ||
-    "http://localhost:3333" + "/api",
+    "http://localhost:3333",
 });
